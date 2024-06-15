@@ -55,16 +55,18 @@ def default_midi_ports():
         print("MIDI output device not found")
     return in_port_index, out_port_index
 
-def start_midi_loop(midi_in, midi_out):
+def start_midi_loop(midi_in, midi_out): 
     print("Starting MIDI message processing loop...")
     while True:
         message = midi_in.get_message()
+        
         if message:
             try:
                 ([midi_msg_type, midi_msg_data], delta_seconds) = message
                 footswitch = display(midi_msg_data)
                 print(f"{footswitch} | {midi_msg_type} | {midi_msg_data} | {delta_seconds:0.000f}s")
                 behaviour[footswitch](midi_out, delta_seconds)
+                
             except ValueError as e:
                 print(e)
                 print(message)
