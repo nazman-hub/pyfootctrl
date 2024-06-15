@@ -5,6 +5,11 @@ import rtmidi # https://spotlightkid.github.io/python-rtmidi/
 from config import behaviour
 from chocolate import display
 
+import psutil
+
+import subprocess
+import os
+
 # For windows, get loop midi at https://www.tobias-erichsen.de/software/loopmidi.html
 # midiberry for BLE https://apps.microsoft.com/store/detail/midiberry/9N39720H2M05?hl=pt-br&gl=br
 
@@ -13,6 +18,23 @@ in_ports_by_name = midi_in.get_ports()
 
 midi_out = rtmidi.MidiOut()
 out_ports_by_name = midi_out.get_ports()
+
+def run_shortcut(shortcut_path):
+    if os.path.exists(shortcut_path):
+        subprocess.Popen(shortcut_path, shell=True)
+        print(f"Opening {shortcut_path}")
+    else:
+        print(f"Shortcut {shortcut_path} does not exist")
+
+def is_program_running(program_name):
+    # Check if there is any running process that contains the program name.
+    for proc in psutil.process_iter(['name']):
+        try:
+            if program_name.lower() in proc.info['name'].lower():
+                return True
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+    return False
 
 def display_midi_ports():
     print("Available MIDI IN ports:", '\n'.join([ f'{number} -> {name}' for number,name in enumerate(in_ports_by_name)]), sep='\n')
@@ -74,6 +96,23 @@ def start_midi_loop(midi_in, midi_out):
 
 
 if __name__ == '__main__':
+    shortcut_path = 'loopmidi.lnk'
+    run_shortcut(shortcut_path)
+
+    program_name = "loopMIDI.exe"  # The program to wait for
+
+    print(f"Waiting for {program_name} to start...")
+    
+    # Use a while loop to wait until the program is detected
+    while not is_program_running(program_name):
+        time.sleep(1)  # Wait for 1 second before checking again
+
+    print(f"{program_name} detected. Running the script.")
+
+
+
+
+
     in_port, out_port = default_midi_ports()
     midi_in.open_port(in_port)
     midi_out.open_port(out_port)
