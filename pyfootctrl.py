@@ -74,12 +74,17 @@ def start_midi_loop(midi_in, midi_out):
 
 
 if __name__ == '__main__':
+    
+    display_midi_ports()
+
     in_port, out_port = default_midi_ports()
     midi_in.open_port(in_port)
     midi_out.open_port(out_port)
+    
     try:
         start_midi_loop(midi_in, midi_out)
     except KeyboardInterrupt:
         print("Bye!")
         exit(0)
 
+    
